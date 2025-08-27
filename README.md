@@ -59,7 +59,7 @@ All available state callbacks:
 * `OnDetectionStartAsAny()` - called when object starts being detected by a detector.
 * `OnDetectionEndAsGhost()` - called when object stops being detected by a detector, but was not able to be detected by
   a detector.
-* `OnDetectionEndAsDetected()` - called when object stops being detected by a detector and can be detected.
+* `OnDetectionEndAsDetected()` - called when object stops being detected by a detector and was able to be detected.
 * `OnDetectionEndAsAny()` - called when object stops being detected by a detector.
 
 ## Creating a detector
