@@ -1,6 +1,6 @@
-﻿using Systems.Detection2D.Components.Objects.Abstract;
+﻿using Systems.SimpleDetection.Components.Objects.Abstract;
 
-namespace Systems.Detection2D.Components.Objects.Debugging
+namespace Systems.SimpleDetection.Components.Objects.Debugging
 {
     /// <summary>
     ///     Represents a simple point that can be detected.

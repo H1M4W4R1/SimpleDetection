@@ -1,8 +1,8 @@
 ﻿using JetBrains.Annotations;
-using Systems.Detection2D.Components.Detectors.Abstract;
-using Systems.Detection2D.Components.Objects.Abstract;
+using Systems.SimpleDetection.Components.Detectors.Abstract;
+using Systems.SimpleDetection.Components.Objects.Abstract;
 
-namespace Systems.Detection2D.Data
+namespace Systems.SimpleDetection.Data
 {
     /// <summary>
     ///     Context for object detection

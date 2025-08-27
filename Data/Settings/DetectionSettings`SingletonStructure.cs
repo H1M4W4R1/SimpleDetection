@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Systems.Detection2D.Data.Settings
+namespace Systems.SimpleDetection.Data.Settings
 {
     public sealed partial class DetectionSettings : ScriptableObject
     {

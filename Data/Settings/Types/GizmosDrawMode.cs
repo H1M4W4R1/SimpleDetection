@@ -1,4 +1,4 @@
-﻿namespace Systems.Detection2D.Data.Settings.Types
+﻿namespace Systems.SimpleDetection.Data.Settings.Types
 {
     public enum GizmosDrawMode
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using Systems.Detection2D.Data;
-using Systems.Detection2D.Data.Enums;
+using Systems.SimpleDetection.Data;
+using Systems.SimpleDetection.Data.Enums;
 
-namespace Systems.Detection2D.Components.Objects.Abstract
+namespace Systems.SimpleDetection.Components.Objects.Abstract
 {
     /// <summary>
     ///     Detectable object with automatic state support.

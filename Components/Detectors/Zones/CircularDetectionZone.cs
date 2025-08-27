@@ -1,13 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
-using Systems.Detection2D.Data.Enums;
-using Systems.Detection2D.Utility;
+using Systems.SimpleDetection.Data.Enums;
+using Systems.SimpleDetection.Utility;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Systems.Detection2D.Components.Detectors.Zones
+namespace Systems.SimpleDetection.Components.Detectors.Zones
 {
     [BurstCompile] public readonly struct CircularDetectionZone : IDetectionZone
     {

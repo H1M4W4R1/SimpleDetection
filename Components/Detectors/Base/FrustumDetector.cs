@@ -1,9 +1,9 @@
-﻿using Systems.Detection2D.Components.Detectors.Abstract;
-using Systems.Detection2D.Components.Detectors.Zones;
+﻿using Systems.SimpleDetection.Components.Detectors.Abstract;
+using Systems.SimpleDetection.Components.Detectors.Zones;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Systems.Detection2D.Components.Detectors.Base
+namespace Systems.SimpleDetection.Components.Detectors.Base
 {
     // ReSharper disable once ClassCanBeSealed.Global
     public class FrustumDetector : ObjectDetectorBase

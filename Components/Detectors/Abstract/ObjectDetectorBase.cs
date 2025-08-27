@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using Systems.Detection2D.Components.Detectors.Markers;
-using Systems.Detection2D.Components.Detectors.Zones;
-using Systems.Detection2D.Components.Objects.Abstract;
-using Systems.Detection2D.Data;
-using Systems.Detection2D.Data.Enums;
-using Systems.Detection2D.Data.Settings;
-using Systems.Detection2D.Data.Settings.Types;
+using Systems.SimpleDetection.Components.Detectors.Markers;
+using Systems.SimpleDetection.Components.Detectors.Zones;
+using Systems.SimpleDetection.Components.Objects.Abstract;
+using Systems.SimpleDetection.Data;
+using Systems.SimpleDetection.Data.Enums;
+using Systems.SimpleDetection.Data.Settings;
+using Systems.SimpleDetection.Data.Settings.Types;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Systems.Detection2D.Components.Detectors.Abstract
+namespace Systems.SimpleDetection.Components.Detectors.Abstract
 {
     /// <summary>
     ///     Base class for all object detectors

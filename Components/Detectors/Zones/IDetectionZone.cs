@@ -1,8 +1,8 @@
-﻿using Systems.Detection2D.Data.Enums;
+﻿using Systems.SimpleDetection.Data.Enums;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Systems.Detection2D.Components.Detectors.Zones
+namespace Systems.SimpleDetection.Components.Detectors.Zones
 {
     /// <summary>
     ///     Detection zone - represents a zone where objects can be detected.

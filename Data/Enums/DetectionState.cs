@@ -1,4 +1,4 @@
-﻿namespace Systems.Detection2D.Data.Enums
+﻿namespace Systems.SimpleDetection.Data.Enums
 {
     public enum DetectionState
     {

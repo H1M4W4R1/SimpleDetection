@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 
-namespace Systems.Detection2D.Utility
+namespace Systems.SimpleDetection.Utility
 {
     public static class MathExtensions
     {

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using Systems.Detection2D.Components.Detectors.Abstract;
-using Systems.Detection2D.Data;
+using Systems.SimpleDetection.Components.Detectors.Abstract;
+using Systems.SimpleDetection.Data;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Systems.Detection2D.Components.Objects.Abstract
+namespace Systems.SimpleDetection.Components.Objects.Abstract
 {
     /// <summary>
     ///     Represents object that may be detected using Detection system.

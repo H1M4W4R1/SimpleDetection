@@ -1,8 +1,8 @@
 using System;
-using Systems.Detection2D.Data.Settings.Types;
+using Systems.SimpleDetection.Data.Settings.Types;
 using UnityEngine;
 
-namespace Systems.Detection2D.Data.Settings
+namespace Systems.SimpleDetection.Data.Settings
 {
     [Serializable] public sealed partial class DetectionSettings
     {

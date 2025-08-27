@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 using UnityEditor;
 
-namespace Systems.Detection2D.Data.Settings
+namespace Systems.SimpleDetection.Data.Settings
 {
 
     internal static class DetectionSettingsEditor
