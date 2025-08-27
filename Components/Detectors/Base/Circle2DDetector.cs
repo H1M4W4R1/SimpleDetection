@@ -6,18 +6,14 @@ using UnityEngine;
 namespace Systems.SimpleDetection.Components.Detectors.Base
 {
     // ReSharper disable once ClassCanBeSealed.Global
-    public class FrustumDetector : ObjectDetectorBase
+    public abstract class Circle2DDetector : ObjectDetectorBase
     {
-        [SerializeField] private float angle = 45f;
         [SerializeField] private float radius = 2f;
-        
+
         protected override IDetectionZone GetDetectionZone()
         {
-            Transform objTransform = transform;
-            float3 position = objTransform.position;
-            float3 forward = objTransform.up;
-
-            return new FrustumDetectionZone(position.xy, forward.xy, angle, radius);
+            float3 position = transform.position;
+            return new Circle2DDetectionZone(position.xy, radius);
         }
     }
 }

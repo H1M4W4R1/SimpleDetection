@@ -9,13 +9,13 @@ using UnityEngine;
 
 namespace Systems.SimpleDetection.Components.Detectors.Zones
 {
-    [BurstCompile] public readonly struct CircularDetectionZone : IDetectionZone
+    [BurstCompile] public readonly struct Circle2DDetectionZone : IDetectionZone
     {
         private readonly float2 position;
         private readonly float radius;
         private readonly float radiusSq;
 
-        public CircularDetectionZone(float2 position, float radius)
+        public Circle2DDetectionZone(float2 position, float radius)
         {
             this.position = position;
             this.radius = radius;

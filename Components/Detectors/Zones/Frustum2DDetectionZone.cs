@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Systems.SimpleDetection.Components.Detectors.Zones
 {
-    [BurstCompile] public readonly struct FrustumDetectionZone : IDetectionZone
+    [BurstCompile] public readonly struct Frustum2DDetectionZone : IDetectionZone
     {
         private readonly float2 position;
         private readonly float2 forward;
@@ -17,7 +17,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
         private readonly float radius;
         private readonly float radiusSq;
 
-        public FrustumDetectionZone(float2 position, float2 forward, float angle, float radius)
+        public Frustum2DDetectionZone(float2 position, float2 forward, float angle, float radius)
         {
             this.position = position;
             this.forward = forward;
