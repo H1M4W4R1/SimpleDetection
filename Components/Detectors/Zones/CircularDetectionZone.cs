@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Systems.Detection2D.Data;
 using Systems.Detection2D.Data.Enums;
 using Systems.Detection2D.Utility;
 using Unity.Burst;

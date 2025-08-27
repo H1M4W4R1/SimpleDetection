@@ -1,5 +1,4 @@
 ﻿using Systems.Detection2D.Components.Objects.Abstract;
-using Systems.Detection2D.Data;
 
 namespace Systems.Detection2D.Components.Objects.Debugging
 {

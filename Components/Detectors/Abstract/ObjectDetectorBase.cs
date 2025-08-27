@@ -6,6 +6,8 @@ using Systems.Detection2D.Components.Detectors.Zones;
 using Systems.Detection2D.Components.Objects.Abstract;
 using Systems.Detection2D.Data;
 using Systems.Detection2D.Data.Enums;
+using Systems.Detection2D.Data.Settings;
+using Systems.Detection2D.Data.Settings.Types;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -17,9 +19,6 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
     public abstract class ObjectDetectorBase : MonoBehaviour
     {
         private readonly List<DetectableObjectBase> _detectedObjects = new();
-        
-        [SerializeField] [Tooltip("Draw debug information for all objects that can be detected by this detector")]
-        private bool drawDebugObjects;
 
         [SerializeField]
         [Tooltip("Layer mask used to perform raycasts for this detector, should contain obstacle layers")]
@@ -39,7 +38,7 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         ///     Checks if this detector supports ghost detection
         /// </summary>
         protected bool SupportsGhostDetection => this is ISupportGhostDetection;
-        
+
         /// <summary>
         ///     Update detection zone of this detector.
         /// </summary>
@@ -62,7 +61,7 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual bool CanBeDetected([NotNull] DetectableObjectBase obj) => true;
-        
+
         /// <summary>
         ///     Updates detection zone data if necessary
         /// </summary>
@@ -92,7 +91,7 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
                 // Skip if object cannot be detected by this detector due to invalid type
                 // or other reasons
                 if (!CanBeDetected(obj)) continue;
-                
+
                 // Update when editor is not playing
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -180,7 +179,7 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         protected virtual void OnObjectGhostDetected([NotNull] DetectableObjectBase obj)
         {
         }
-        
+
         /// <summary>
         ///     Called when an object detection is attempted, but the object is not seen
         ///     or when object cannot be seen and ghost processing is disabled.     
@@ -192,7 +191,8 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         ///     on the detected object.
         /// </remarks>
         protected virtual void OnObjectDetectionFailed([NotNull] DetectableObjectBase obj)
-        { }
+        {
+        }
 
         /// <summary>
         ///     Called when an object detection starts.
@@ -203,9 +203,8 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         /// </remarks>
         protected virtual void OnObjectDetectionStart([NotNull] DetectableObjectBase obj)
         {
-            
         }
-        
+
         /// <summary>
         ///     Called when an object detection ends.
         /// </summary>
@@ -215,7 +214,6 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         /// </remarks>
         protected virtual void OnObjectDetectionEnd([NotNull] DetectableObjectBase obj)
         {
-            
         }
 
         /// <summary>
@@ -240,12 +238,28 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
         /// </remarks>
         private void TryAddDetectedObject([NotNull] DetectableObjectBase obj)
         {
-            if(_detectedObjects.Contains(obj)) return;
+            if (_detectedObjects.Contains(obj)) return;
             _detectedObjects.Add(obj);
             OnObjectDetectionStart(obj);
         }
-        
+
         protected void OnDrawGizmos()
+        {
+#if UNITY_EDITOR
+            if (DetectionSettings.Instance.gizmosDrawModeForDetectors == GizmosDrawMode.Selected) return;
+            DrawGizmos();
+#endif
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+#if UNITY_EDITOR
+            if (DetectionSettings.Instance.gizmosDrawModeForDetectors != GizmosDrawMode.Selected) return;
+            DrawGizmos();
+#endif
+        }
+
+        protected void DrawGizmos()
         {
 #if UNITY_EDITOR
             // Update zone data and draw zone gizmos
@@ -253,7 +267,7 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
             DetectionZone.DrawGizmos(raycastLayerMask);
 
             // Check if should debug-draw objects data
-            if (!drawDebugObjects) return;
+            if (!DetectionSettings.Instance.drawDetectionPoints) return;
 
             // Draw detection objects information
             IReadOnlyList<DetectableObjectBase> detectableObjects = DetectableObjectBase.GetAllDetectableObjects();
@@ -279,14 +293,19 @@ namespace Systems.Detection2D.Components.Detectors.Abstract
                     ObjectDetectionContext context = new(obj, this);
                     switch (isSeen)
                     {
-                        case SpotResult.Outside: Gizmos.color = Color.darkGreen; break;
-                        case SpotResult.InsideObstructed: Gizmos.color = Color.green; break;
+                        case SpotResult.Outside:
+                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectOutsideOfDetectionZone;
+                            break;
+                        case SpotResult.InsideObstructed:
+                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectInsideZoneUndetected; break;
                         case SpotResult.InsideSeen
-                            when obj.CanBeDetected(context): Gizmos.color = Color.red; break;
-                        case SpotResult.InsideSeen: Gizmos.color = Color.yellow; break;
+                            when obj.CanBeDetected(context):
+                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectIndideZoneDetected; break;
+                        case SpotResult.InsideSeen:
+                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectInsideZoneGhost; break;
                     }
 
-                    Gizmos.DrawSphere(point, 0.3f);
+                    Gizmos.DrawSphere(point, DetectionSettings.Instance.detectionPointRadius);
                 }
 #endif
             }

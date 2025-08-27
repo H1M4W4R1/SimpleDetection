@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Systems.Detection2D.Components.Detectors.Abstract;
+﻿using Systems.Detection2D.Components.Detectors.Abstract;
 using Systems.Detection2D.Components.Detectors.Zones;
 using Unity.Mathematics;
 using UnityEngine;

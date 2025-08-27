@@ -1,5 +1,4 @@
-﻿using Systems.Detection2D.Data;
-using Systems.Detection2D.Data.Enums;
+﻿using Systems.Detection2D.Data.Enums;
 using Unity.Mathematics;
 using UnityEngine;
 
