@@ -17,7 +17,7 @@ which is a planned feature for future Unity releases.
 * Unity.Mathematics
 
 # Usage
-## Creating a detectable object
+## Creating a stateless detectable object
 To create a detectable object you need to create a custom object class that inherits from
 `DetectableObjectBase` and implement all methods you find useful.
 
@@ -39,6 +39,22 @@ Methods to check:
   Requires detector to support ghost detection (implement `ISupportGhostDetection` interface)
 * `OnObjectDetectionFailed(context)` - called each frame object is not detected by a detector.
 * `CanBeDetected(context)` - called to check if object can be detected by a detector.
+
+## Creating a stated detectable object
+You can also implement `DetectableObjectWithStatesBase` - a version of `DetectableObjectBase` that
+supports states.
+
+All available state callbacks:
+* `OnStayAsGhostDetected()` - called each frame object is detected by a detector, but cannot be detected. 
+* `OnStayAsDetected()` - called each frame object is detected by a detector and can be detected.
+* `OnStayAsAnyDetected()` - called each frame object is detected by a detector.
+* `OnStayAsUndetected()` - called each frame object is not detected by a detector.
+* `OnDetectionStartAsGhost()` - called when object starts being detected by a detector, but cannot be detected.
+* `OnDetectionStartAsDetected()` - called when object starts being detected by a detector and can be detected.
+* `OnDetectionStartAsAny()` - called when object starts being detected by a detector.
+* `OnDetectionEndAsGhost()` - called when object stops being detected by a detector, but cannot be detected.
+* `OnDetectionEndAsDetected()` - called when object stops being detected by a detector and can be detected.
+* `OnDetectionEndAsAny()` - called when object stops being detected by a detector.
 
 ## Creating a detector
 To create a detector you need to create a custom detector class that inherits from
@@ -73,6 +89,13 @@ Note: you can access all objects detected by detector by using `DetectedObjects`
 
 Note: to support ghost detection detector should implement `ISupportGhostDetection` interface, otherwise
 ghosts will be considered as **undetected**.
+
+### References
+For reference, you can see two example detectors already implemented:
+* `CircularDetector`
+* `FrustumDetector`
+
+Both can also be extended for custom implementations.
 
 ## Detection zone
 Detection zone is a structure that defines area in which objects can be detected. It is used by detectors to check if 
