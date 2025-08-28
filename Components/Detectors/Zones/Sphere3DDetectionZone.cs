@@ -1,13 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using Systems.SimpleDetection.Data.Enums;
-using Systems.SimpleDetection.Utility;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Systems.SimpleDetection.Components.Detectors.Zones
 {

@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Systems.SimpleDetection.Data.Enums;
+﻿using Systems.SimpleDetection.Data.Enums;
 using Systems.SimpleDetection.Utility;
 using Unity.Burst;
 using Unity.Collections;
