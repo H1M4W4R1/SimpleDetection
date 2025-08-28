@@ -1,5 +1,5 @@
 {
-    "name": "Detection2D",
+    "name": "SimpleDetection",
     "rootNamespace": "",
     "references": [
         "Unity.Burst",
