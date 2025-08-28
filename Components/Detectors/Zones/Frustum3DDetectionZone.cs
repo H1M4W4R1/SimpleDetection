@@ -1,5 +1,5 @@
-﻿using Systems.SimpleDetection.Data.Enums;
-using Systems.SimpleDetection.Utility;
+﻿using Systems.SimpleCore.Utility;
+using Systems.SimpleDetection.Data.Enums;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
