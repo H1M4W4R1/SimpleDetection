@@ -307,8 +307,9 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 
                     Gizmos.DrawSphere(point, DetectionSettings.Instance.detectionPointRadius);
                 }
-#endif
+
             }
+#endif
         }
     }
 }
