@@ -1,4 +1,5 @@
 ﻿using System;
+using Systems.SimpleCore.Operations;
 using Systems.SimpleDetection.Data;
 using Systems.SimpleDetection.Data.Enums;
 
@@ -13,21 +14,21 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
 
 #region BASE Implementation
 
-        protected internal sealed override void OnDetected(ObjectDetectionContext context)
+        protected internal sealed override void OnDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
-            base.OnDetected(context);
+            base.OnDetected(context, detectionResult);
             TryUpdateState(DetectionState.Detected);
         }
 
-        protected internal sealed override void OnObjectDetectionFailed(ObjectDetectionContext context)
+        protected internal sealed override void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
-            base.OnObjectDetectionFailed(context);
+            base.OnObjectDetectionFailed(context, detectionResult);
             TryUpdateState(DetectionState.NotDetected);
         }
 
-        protected internal sealed override void OnObjectGhostDetected(ObjectDetectionContext context)
+        protected internal sealed override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
-            base.OnObjectGhostDetected(context);
+            base.OnObjectGhostDetected(context, detectionResult);
             TryUpdateState(DetectionState.GhostDetected);
         }
 

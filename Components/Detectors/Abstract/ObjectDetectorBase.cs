@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using Systems.SimpleCore.Operations;
 using Systems.SimpleDetection.Components.Detectors.Markers;
 using Systems.SimpleDetection.Components.Detectors.Zones;
 using Systems.SimpleDetection.Components.Objects.Abstract;
@@ -60,7 +61,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Should be used to verify custom types of objects for detectors using 'is' operator.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual bool CanBeDetected(in ObjectDetectionContext context) =>
+        public virtual OperationResult CanDetect(in ObjectDetectionContext context) =>
             context.detectableObject.CanBeDetected(context);
 
         /// <summary>
@@ -102,13 +103,14 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 #endif
 
                 bool isSeen = false;
-                bool canBeDetected = obj.CanBeDetected(context);
+                OperationResult detectionResult = CanDetect(context);
+                
 
                 // Skip if object cannot be detected and ghost detection is disabled
-                if (!SupportsGhostDetection && !canBeDetected)
+                if (!SupportsGhostDetection && !detectionResult)
                 {
-                    OnObjectDetectionFailed(context);
-                    TryRemoveDetectedObject(context);
+                    OnObjectDetectionFailed(context, detectionResult);
+                    TryRemoveDetectedObject(context, detectionResult);
                     continue;
                 }
 
@@ -125,15 +127,15 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
                 // Skip if object is not seen
                 if (!isSeen)
                 {
-                    OnObjectDetectionFailed(context);
-                    TryRemoveDetectedObject(context);
+                    OnObjectDetectionFailed(context, detectionResult);
+                    TryRemoveDetectedObject(context, detectionResult);
                     continue;
                 }
 
                 // Perform events execution
-                TryAddDetectedObject(context);
-                if (canBeDetected) OnObjectDetected(context);
-                else OnObjectGhostDetected(context);
+                TryAddDetectedObject(context, detectionResult);
+                if (detectionResult) OnObjectDetected(context, detectionResult);
+                else OnObjectGhostDetected(context, detectionResult);
             }
         }
 
@@ -141,30 +143,32 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Called when an object is detected.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called on each detected object.
         ///     It is called after <see cref="DetectableObjectBase.OnDetected"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectDetected(in ObjectDetectionContext context)
+        protected virtual void OnObjectDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             context.detectableObject._OnSeen(context);
-            context.detectableObject.OnDetected(context);
+            context.detectableObject.OnDetected(context, detectionResult);
         }
 
         /// <summary>
         ///     Called when an object detection is attempted, but the object is not seen.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called on each detectable object that is not seen.
         ///     It is called after <see cref="DetectableObjectBase.OnObjectGhostDetected"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectGhostDetected(in ObjectDetectionContext context)
+        protected virtual void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             context.detectableObject._OnSeen(context);
-            context.detectableObject.OnObjectGhostDetected(context);
+            context.detectableObject.OnObjectGhostDetected(context, detectionResult);
         }
 
         /// <summary>
@@ -172,25 +176,27 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     or when object cannot be seen and ghost processing is disabled.     
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called on each detectable object that is not seen.
         ///     It is called after <see cref="DetectableObjectBase.OnObjectDetectionFailed"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectDetectionFailed(in ObjectDetectionContext context)
+        protected virtual void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             context.detectableObject._OnNotSeen(context);
-            context.detectableObject.OnObjectDetectionFailed(context);
+            context.detectableObject.OnObjectDetectionFailed(context, detectionResult);
         }
 
         /// <summary>
         ///     Called when an object detection starts.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called when object is newly detected.
         /// </remarks>
-        protected virtual void OnObjectDetectionStart(in ObjectDetectionContext context)
+        protected virtual void OnObjectDetectionStart(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
         }
 
@@ -198,10 +204,11 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Called when an object detection ends.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called when object is no longer detected.
         /// </remarks>
-        protected virtual void OnObjectDetectionEnd(in ObjectDetectionContext context)
+        protected virtual void OnObjectDetectionEnd(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
         }
 
@@ -209,28 +216,30 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Removes the given object from the list of detected objects.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called when object is no longer detected.
         /// </remarks>
-        private void TryRemoveDetectedObject(in ObjectDetectionContext context)
+        private void TryRemoveDetectedObject(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             DetectableObjectBase obj = context.detectableObject;
             int nRemoved = _detectedObjects.RemoveAll(o => ReferenceEquals(o, obj));
-            if (nRemoved > 0) OnObjectDetectionEnd(context);
+            if (nRemoved > 0) OnObjectDetectionEnd(context, detectionResult);
         }
 
         /// <summary>
         ///     Adds the given object to the list of detected objects.
         /// </summary>
         /// <param name="context">Context of the detected object</param>
+        /// <param name="detectionResult">Result of the detection attempt</param>
         /// <remarks>
         ///     This method is called when object is newly detected.
         /// </remarks>
-        private void TryAddDetectedObject(in ObjectDetectionContext context)
+        private void TryAddDetectedObject(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             if (_detectedObjects.Contains(context.detectableObject)) return;
             _detectedObjects.Add(context.detectableObject);
-            OnObjectDetectionStart(context);
+            OnObjectDetectionStart(context, detectionResult);
         }
 
         protected void OnDrawGizmos()

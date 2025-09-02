@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using Systems.SimpleCore.Operations;
 using Systems.SimpleDetection.Components.Detectors.Abstract;
 using Systems.SimpleDetection.Data;
+using Systems.SimpleDetection.Operations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -45,7 +47,11 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         ///     This method is intended to support ghost objects or
         ///     conditional detection (for example when player is doing forbidden action).
         /// </remarks>
-        public virtual bool CanBeDetected(ObjectDetectionContext context) => !IsGhost;
+        public virtual OperationResult CanBeDetected(ObjectDetectionContext context)
+        {
+            if (IsGhost) return DetectionOperations.IsGhost();
+            return DetectionOperations.Permitted();
+        }
 
         /// <summary>
         ///     Get amount of positions where object can be detected
@@ -82,7 +88,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         /// <summary>
         ///     Called when object is detected
         /// </summary>
-        protected internal virtual void OnDetected(ObjectDetectionContext context)
+        protected internal virtual void OnDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
         }
 
@@ -90,7 +96,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         ///     Called when object is being seen by detector, however
         ///     it cannot be detected at the moment (see <see cref="CanBeDetected"/> method).
         /// </summary>
-        protected internal virtual void OnObjectGhostDetected(ObjectDetectionContext context)
+        protected internal virtual void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
         }
 
@@ -101,7 +107,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         /// <remarks>
         ///     Implemented to support state-based detection solutions.
         /// </remarks>
-        protected internal virtual void OnObjectDetectionFailed(ObjectDetectionContext context)
+        protected internal virtual void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
         }
 
