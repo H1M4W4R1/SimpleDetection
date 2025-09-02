@@ -54,13 +54,14 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         /// <summary>
         ///     Check if specific object can be detected by this detector
         /// </summary>
-        /// <param name="obj">Object to check</param>
+        /// <param name="context">Context of the detection to check</param>
         /// <returns>True if the object can be detected by this detector, false otherwise</returns>
         /// <remarks>
         ///     Should be used to verify custom types of objects for detectors using 'is' operator.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual bool CanBeDetected([NotNull] DetectableObjectBase obj) => true;
+        public virtual bool CanBeDetected(ObjectDetectionContext context) =>
+            context.detectableObject.CanBeDetected(context);
 
         /// <summary>
         ///     Updates detection zone data if necessary
@@ -88,10 +89,9 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
             {
                 DetectableObjectBase obj = detectableObjects[index];
 
-                // Skip if object cannot be detected by this detector due to invalid type
-                // or other reasons
-                if (!CanBeDetected(obj)) continue;
-
+                // Construct context
+                ObjectDetectionContext context = new(obj, this);
+         
                 // Update when editor is not playing
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -103,11 +103,8 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 
                 bool isSeen = false;
 
-                // Construct context
-                ObjectDetectionContext context = new(obj, this);
-
                 // Skip if object cannot be detected and ghost detection is disabled
-                if (!SupportsGhostDetection && !obj.CanBeDetected(context))
+                if (!SupportsGhostDetection)
                 {
                     obj._OnNotSeen(context);
                     obj.OnObjectDetectionFailed(context);
@@ -137,7 +134,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
                 }
 
                 // Perform events execution
-                if (!SupportsGhostDetection || obj.CanBeDetected(context))
+                if (obj.CanBeDetected(context))
                 {
                     obj._OnSeen(context);
                     obj.OnDetected(context);
@@ -307,7 +304,6 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 
                     Gizmos.DrawSphere(point, DetectionSettings.Instance.detectionPointRadius);
                 }
-
             }
 #endif
         }

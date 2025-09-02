@@ -23,7 +23,14 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         /// </summary>
         internal static readonly List<DetectableObjectBase> AllObjects = new();
 
-        [field: SerializeField] public bool IsGhost { get; private set; }
+        /// <summary>
+        ///     Object won't be seen even if it is detected by detector.
+        /// </summary>
+        [field: SerializeField] public bool IsGhost { get; protected set; }
+        
+        /// <summary>
+        ///     Access to detection positions list.
+        /// </summary>
         public ref UnsafeList<float3> DetectionPositions => ref _detectionPositions;
 
         /// <summary>
