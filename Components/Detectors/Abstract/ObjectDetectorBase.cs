@@ -60,7 +60,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Should be used to verify custom types of objects for detectors using 'is' operator.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual bool CanBeDetected(ObjectDetectionContext context) =>
+        public virtual bool CanBeDetected(in ObjectDetectionContext context) =>
             context.detectableObject.CanBeDetected(context);
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 
                 // Construct context
                 ObjectDetectionContext context = new(obj, this);
-         
+
                 // Update when editor is not playing
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -102,14 +102,13 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
 #endif
 
                 bool isSeen = false;
+                bool canBeDetected = obj.CanBeDetected(context);
 
                 // Skip if object cannot be detected and ghost detection is disabled
-                if (!SupportsGhostDetection)
+                if (!SupportsGhostDetection && !canBeDetected)
                 {
-                    obj._OnNotSeen(context);
-                    obj.OnObjectDetectionFailed(context);
-                    OnObjectDetectionFailed(obj);
-                    TryRemoveDetectedObject(obj);
+                    OnObjectDetectionFailed(context);
+                    TryRemoveDetectedObject(context);
                     continue;
                 }
 
@@ -126,118 +125,112 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
                 // Skip if object is not seen
                 if (!isSeen)
                 {
-                    obj._OnNotSeen(context);
-                    obj.OnObjectDetectionFailed(context);
-                    OnObjectDetectionFailed(obj);
-                    TryRemoveDetectedObject(obj);
+                    OnObjectDetectionFailed(context);
+                    TryRemoveDetectedObject(context);
                     continue;
                 }
 
                 // Perform events execution
-                if (obj.CanBeDetected(context))
-                {
-                    obj._OnSeen(context);
-                    obj.OnDetected(context);
-                    OnObjectDetected(obj);
-                    TryAddDetectedObject(obj);
-                }
-                else
-                {
-                    obj._OnSeen(context);
-                    obj.OnObjectGhostDetected(context);
-                    OnObjectGhostDetected(obj);
-                    TryAddDetectedObject(obj);
-                }
+                TryAddDetectedObject(context);
+                if (canBeDetected) OnObjectDetected(context);
+                else OnObjectGhostDetected(context);
             }
         }
 
         /// <summary>
         ///     Called when an object is detected.
         /// </summary>
-        /// <param name="obj">Detected object</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called on each detected object.
         ///     It is called after <see cref="DetectableObjectBase.OnDetected"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectDetected([NotNull] DetectableObjectBase obj)
+        protected virtual void OnObjectDetected(in ObjectDetectionContext context)
         {
+            context.detectableObject._OnSeen(context);
+            context.detectableObject.OnDetected(context);
         }
 
         /// <summary>
         ///     Called when an object detection is attempted, but the object is not seen.
         /// </summary>
-        /// <param name="obj">Object that was attempted to detect</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called on each detectable object that is not seen.
         ///     It is called after <see cref="DetectableObjectBase.OnObjectGhostDetected"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectGhostDetected([NotNull] DetectableObjectBase obj)
+        protected virtual void OnObjectGhostDetected(in ObjectDetectionContext context)
         {
+            context.detectableObject._OnSeen(context);
+            context.detectableObject.OnObjectGhostDetected(context);
         }
 
         /// <summary>
         ///     Called when an object detection is attempted, but the object is not seen
         ///     or when object cannot be seen and ghost processing is disabled.     
         /// </summary>
-        /// <param name="obj">Object that was attempted to detect</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called on each detectable object that is not seen.
         ///     It is called after <see cref="DetectableObjectBase.OnObjectDetectionFailed"/> method is called
         ///     on the detected object.
         /// </remarks>
-        protected virtual void OnObjectDetectionFailed([NotNull] DetectableObjectBase obj)
+        protected virtual void OnObjectDetectionFailed(in ObjectDetectionContext context)
         {
+            context.detectableObject._OnNotSeen(context);
+            context.detectableObject.OnObjectDetectionFailed(context);
         }
 
         /// <summary>
         ///     Called when an object detection starts.
         /// </summary>
-        /// <param name="obj">Object that was detected</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called when object is newly detected.
         /// </remarks>
-        protected virtual void OnObjectDetectionStart([NotNull] DetectableObjectBase obj)
+        protected virtual void OnObjectDetectionStart(in ObjectDetectionContext context)
         {
         }
 
         /// <summary>
         ///     Called when an object detection ends.
         /// </summary>
-        /// <param name="obj">Object that was detected</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called when object is no longer detected.
         /// </remarks>
-        protected virtual void OnObjectDetectionEnd([NotNull] DetectableObjectBase obj)
+        protected virtual void OnObjectDetectionEnd(in ObjectDetectionContext context)
         {
         }
 
         /// <summary>
         ///     Removes the given object from the list of detected objects.
         /// </summary>
-        /// <param name="obj">Object to remove from the list of detected objects</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called when object is no longer detected.
         /// </remarks>
-        private void TryRemoveDetectedObject([NotNull] DetectableObjectBase obj)
+        private void TryRemoveDetectedObject(in ObjectDetectionContext context)
         {
+            DetectableObjectBase obj = context.detectableObject;
             int nRemoved = _detectedObjects.RemoveAll(o => ReferenceEquals(o, obj));
-            if (nRemoved > 0) OnObjectDetectionEnd(obj);
+            if (nRemoved > 0) OnObjectDetectionEnd(context);
         }
 
         /// <summary>
         ///     Adds the given object to the list of detected objects.
         /// </summary>
-        /// <param name="obj">Object to add to the list of detected objects</param>
+        /// <param name="context">Context of the detected object</param>
         /// <remarks>
         ///     This method is called when object is newly detected.
         /// </remarks>
-        private void TryAddDetectedObject([NotNull] DetectableObjectBase obj)
+        private void TryAddDetectedObject(in ObjectDetectionContext context)
         {
-            if (_detectedObjects.Contains(obj)) return;
-            _detectedObjects.Add(obj);
-            OnObjectDetectionStart(obj);
+            if (_detectedObjects.Contains(context.detectableObject)) return;
+            _detectedObjects.Add(context.detectableObject);
+            OnObjectDetectionStart(context);
         }
 
         protected void OnDrawGizmos()
