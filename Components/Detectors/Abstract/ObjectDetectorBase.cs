@@ -60,7 +60,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
         ///     Should be used to verify custom types of objects for detectors using 'is' operator.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected virtual bool CanBeDetected([NotNull] DetectableObjectBase obj) => true;
+        public bool CanBeDetected([NotNull] DetectableObjectBase obj) => true;
 
         /// <summary>
         ///     Updates detection zone data if necessary

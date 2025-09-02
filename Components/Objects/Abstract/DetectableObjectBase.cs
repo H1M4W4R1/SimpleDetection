@@ -38,7 +38,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         ///     This method is intended to support ghost objects or
         ///     conditional detection (for example when player is doing forbidden action).
         /// </remarks>
-        protected internal virtual bool CanBeDetected(ObjectDetectionContext context) => !IsGhost;
+        public virtual bool CanBeDetected(ObjectDetectionContext context) => !IsGhost;
 
         /// <summary>
         ///     Get amount of positions where object can be detected
