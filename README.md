@@ -7,12 +7,7 @@
 
 SimpleDetection is a Unity3D system that creates detection capabilities.
 
-# Requirements
-
-* Unity.Burst
-* Unity.Collections
-* Unity.Mathematics
-* [SimpleCore](https://github.com/H1M4W4R1/SimpleCore) by H1M4W4R1
+*For requirements check .asmdef*
 
 # Usage
 
