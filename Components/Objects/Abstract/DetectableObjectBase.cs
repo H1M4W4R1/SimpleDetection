@@ -47,7 +47,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         ///     This method is intended to support ghost objects or
         ///     conditional detection (for example when player is doing forbidden action).
         /// </remarks>
-        public virtual OperationResult CanBeDetected(ObjectDetectionContext context)
+        protected internal virtual OperationResult CanBeDetected(ObjectDetectionContext context)
         {
             if (IsGhost) return DetectionOperations.IsGhost();
             return DetectionOperations.Permitted();
