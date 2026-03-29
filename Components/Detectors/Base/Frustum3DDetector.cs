@@ -7,10 +7,10 @@ namespace Systems.SimpleDetection.Components.Detectors.Base
 {
     public abstract class Frustum3DDetector : ObjectDetectorBase
     {
-        [SerializeField] private float angle = 45f;
-        [SerializeField] private float aspectRatio = 16/9f;
-        [SerializeField] private float nearPlaneDistance = 1f;
-        [SerializeField] private float farPlaneDistance = 10f;
+        [SerializeField] [Min(0.01f)] private float angle = 45f;
+        [SerializeField] [Min(0.01f)] private float aspectRatio = 16f / 9f;
+        [SerializeField] [Min(0.01f)] private float nearPlaneDistance = 1f;
+        [SerializeField] [Min(0.02f)] private float farPlaneDistance = 10f;
         
         protected override IDetectionZone GetDetectionZone()
         {

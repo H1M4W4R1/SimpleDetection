@@ -68,7 +68,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
 #if UNITY_EDITOR
             const int RESOLUTION = 180;
 
-            UnsafeList<float3> targetPoints = new(RESOLUTION, Allocator.TempJob);
+            UnsafeList<float3> targetPoints = new(RESOLUTION, Allocator.Temp);
             float3 gizmosStartPoint = new(position, 0);
             float2 forward = new float2(0, 1);
 

@@ -8,6 +8,7 @@ namespace Systems.SimpleDetection.Data.Settings
     internal static class DetectionSettingsEditor
     {
         private const string EDITOR_NAME = "Detection Settings";
+        private static SerializedObject _cachedSerializedObject;
 
         [SettingsProvider] [NotNull] public static SettingsProvider CreateSettingsProvider()
         {
@@ -18,11 +19,14 @@ namespace Systems.SimpleDetection.Data.Settings
                 guiHandler = (searchContext) =>
                 {
                     DetectionSettings settings = DetectionSettings.Instance;
-                    SerializedObject so = new(settings);
+                    if (_cachedSerializedObject == null || _cachedSerializedObject.targetObject != settings)
+                        _cachedSerializedObject = new SerializedObject(settings);
+                    SerializedObject so = _cachedSerializedObject;
+                    so.Update();
                  
                     EditorGUILayout.LabelField("Gizmos Colors", EditorStyles.boldLabel);
                     EditorGUILayout.PropertyField(so.FindProperty(nameof(DetectionSettings.gizmosColorObjectOutsideOfDetectionZone)));
-                    EditorGUILayout.PropertyField(so.FindProperty(nameof(DetectionSettings.gizmosColorObjectIndideZoneDetected)));
+                    EditorGUILayout.PropertyField(so.FindProperty(nameof(DetectionSettings.gizmosColorObjectInsideZoneDetected)));
                     EditorGUILayout.PropertyField(so.FindProperty(nameof(DetectionSettings.gizmosColorObjectInsideZoneUndetected)));
                     EditorGUILayout.PropertyField(so.FindProperty(nameof(DetectionSettings.gizmosColorObjectInsideZoneGhost)));
 

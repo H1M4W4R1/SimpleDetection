@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using Systems.SimpleCore.Operations;
+using Systems.SimpleDetection.Components.Detectors.Abstract;
 using Systems.SimpleDetection.Data;
 using Systems.SimpleDetection.Data.Enums;
+using UnityEngine;
 
 namespace Systems.SimpleDetection.Components.Objects.Abstract
 {
@@ -11,25 +14,44 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
     public abstract class DetectableObjectWithStatesBase : DetectableObjectBase
     {
         private DetectionState _state;
+        private readonly Dictionary<ObjectDetectorBase, DetectionState> _perDetectorState = new();
 
 #region BASE Implementation
 
         protected internal sealed override void OnDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             base.OnDetected(context, detectionResult);
-            TryUpdateState(DetectionState.Detected);
+            _perDetectorState[context.detector] = DetectionState.Detected;
+            TryUpdateState(ResolveAggregateState());
         }
 
         protected internal sealed override void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             base.OnObjectDetectionFailed(context, detectionResult);
-            TryUpdateState(DetectionState.NotDetected);
+            _perDetectorState[context.detector] = DetectionState.NotDetected;
+            TryUpdateState(ResolveAggregateState());
         }
 
         protected internal sealed override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
         {
             base.OnObjectGhostDetected(context, detectionResult);
-            TryUpdateState(DetectionState.GhostDetected);
+            _perDetectorState[context.detector] = DetectionState.GhostDetected;
+            TryUpdateState(ResolveAggregateState());
+        }
+
+        /// <summary>
+        ///     Resolves the aggregate state across all detectors using highest-priority-wins:
+        ///     Detected > GhostDetected > NotDetected.
+        /// </summary>
+        private DetectionState ResolveAggregateState()
+        {
+            DetectionState best = DetectionState.NotDetected;
+            foreach (KeyValuePair<ObjectDetectorBase, DetectionState> kvp in _perDetectorState)
+            {
+                if (kvp.Value == DetectionState.Detected) return DetectionState.Detected;
+                if (kvp.Value == DetectionState.GhostDetected) best = DetectionState.GhostDetected;
+            }
+            return best;
         }
 
 #endregion
@@ -60,8 +82,8 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
                         break;
                     case DetectionState.NotDetected: OnStayAsUndetected(); break;
                     default:
-                        throw new ArgumentOutOfRangeException(
-                            $"State {newState} is not supported. Something has changed?");
+                        Debug.LogError($"State {newState} is not supported. Something has changed?");
+                        return;
                 }
 
                 return;
@@ -104,8 +126,8 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
                     OnDetectionStartAsGhost();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(
-                        $"State {newState} is not supported. Something has changed?");
+                    Debug.LogError($"State {newState} is not supported. Something has changed?");
+                    return;
             }
         }
 

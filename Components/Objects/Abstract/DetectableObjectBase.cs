@@ -25,6 +25,9 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         /// </summary>
         internal static readonly List<DetectableObjectBase> AllObjects = new();
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ClearStaticState() => AllObjects.Clear();
+
         /// <summary>
         ///     Object won't be seen even if it is detected by detector.
         /// </summary>

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Systems.SimpleDetection.Data.Settings.Types;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Systems.SimpleDetection.Data.Settings
 {
@@ -11,7 +12,8 @@ namespace Systems.SimpleDetection.Data.Settings
         public Color gizmosColorObjectOutsideOfDetectionZone = Color.blue;
 
         [SerializeField] [Tooltip("Object is inside of detection zone and detected")]
-        public Color gizmosColorObjectIndideZoneDetected = Color.red;
+        [FormerlySerializedAs("gizmosColorObjectIndideZoneDetected")]
+        public Color gizmosColorObjectInsideZoneDetected = Color.red;
 
         [SerializeField] [Tooltip("Object is inside of detection zone but not detected due to occlusion")]
         public Color gizmosColorObjectInsideZoneUndetected = Color.green;

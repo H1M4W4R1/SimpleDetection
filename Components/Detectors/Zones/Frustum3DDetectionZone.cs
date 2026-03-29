@@ -36,7 +36,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
         [BurstCompile] public bool IsPointInZone(in float3 detectionPosition)
         {
             // Compute frustum planes
-            NativeArray<float4> frustumPlanes = new(6, Allocator.TempJob);
+            NativeArray<float4> frustumPlanes = new(6, Allocator.Temp);
             FrustumUtil.ExtractFrustumPlanes(position, rotation, GetFarPlaneHeight(), aspectRatio,
                 nearPlaneDistance, farPlaneDistance, ref frustumPlanes);
 
@@ -50,15 +50,19 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
 
         [BurstDiscard] public SpotResult IsPointSeen(in float3 detectionPosition, int layerMask)
         {
-            // Ensure that point is in zone
-            if (!IsPointInZone(detectionPosition)) return SpotResult.Outside;
-
-            float3 desiredPosition = detectionPosition;
-
-            // Compute planes
-            NativeArray<float4> frustumPlanes = new(6, Allocator.TempJob);
+            // Compute planes once for both zone check and visibility
+            NativeArray<float4> frustumPlanes = new(6, Allocator.Temp);
             FrustumUtil.ExtractFrustumPlanes(position, rotation, GetFarPlaneHeight(), aspectRatio,
                 nearPlaneDistance, farPlaneDistance, ref frustumPlanes);
+
+            // Ensure that point is in zone
+            if (!FrustumUtil.IsPointInFrustum(detectionPosition, frustumPlanes))
+            {
+                frustumPlanes.Dispose();
+                return SpotResult.Outside;
+            }
+
+            float3 desiredPosition = detectionPosition;
 
             // Check if point is behind far plane
             if (!FrustumUtil.IsInside(desiredPosition, frustumPlanes[5]))
@@ -68,17 +72,14 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             if (!FrustumUtil.IsInside(desiredPosition, frustumPlanes[4]))
                 desiredPosition = FrustumUtil.ClosestPointOnPlane(frustumPlanes[4], desiredPosition);
 
+            frustumPlanes.Dispose();
+
             // Compute raycast data, a bit of hack with farPlaneDistance
             if (!Physics.Raycast(position, math.normalize(desiredPosition - position),
                     out RaycastHit hitObj, math.distance(desiredPosition, position), layerMask))
-            {
-                frustumPlanes.Dispose();
                 return SpotResult.InsideSeen;
-            }
 
-            // Ensure that the raycast hit nothing
-            frustumPlanes.Dispose();
-            return ReferenceEquals(hitObj.collider, null) ? SpotResult.InsideSeen : SpotResult.InsideObstructed;
+            return SpotResult.InsideObstructed;
         }
 
         public void DrawGizmos(LayerMask raycastLayerMask)

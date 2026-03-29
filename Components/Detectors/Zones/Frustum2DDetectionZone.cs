@@ -34,13 +34,16 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             // Check if point is within radius
             if (math.lengthsq(detectedPosition - position) > radiusSq) return false;
 
+            // Handle point at exact detector position
+            if (math.lengthsq(detectedPosition - position) < math.EPSILON) return true;
+
             // Check if point is in front of the frustum
             float2 direction = math.normalize(detectedPosition - position);
             float dotProduct = math.dot(direction, forward);
             if (dotProduct < 0f) return false;
 
-            // Check if point is within angle
-            float angleCos = math.cos(angle);
+            // Check if point is within half-angle (angle is full cone width in degrees)
+            float angleCos = math.cos(math.radians(angle * 0.5f));
             if (dotProduct < angleCos) return false;
 
             return true;
@@ -114,7 +117,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
                 RaycastHit2D raycastResult =
                     Physics2D.Raycast(gizmosStartPoint.xy, direction, distance, raycastLayerMask);
 
-                if (raycastResult.point != Vector2.zero) targetPoints[n] = new float3(raycastResult.point, 0);
+                if (raycastResult.collider != null) targetPoints[n] = new float3(raycastResult.point, 0);
             }
 
             // Draw side lines

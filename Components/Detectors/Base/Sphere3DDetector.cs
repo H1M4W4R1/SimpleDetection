@@ -8,7 +8,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Base
     // ReSharper disable once ClassCanBeSealed.Global
     public abstract class Sphere3DDetector : ObjectDetectorBase
     {
-        [SerializeField] private float radius = 2f;
+        [SerializeField] [Min(0.01f)] private float radius = 2f;
 
         protected override IDetectionZone GetDetectionZone()
         {

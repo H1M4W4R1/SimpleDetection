@@ -53,8 +53,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
                     layerMask))
                 return SpotResult.InsideSeen;
 
-            // Ensure that the raycast hit nothing
-            return ReferenceEquals(hitObj.collider, null) ? SpotResult.InsideSeen : SpotResult.InsideObstructed;
+            return SpotResult.InsideObstructed;
         }
 
         /// <summary>
@@ -114,11 +113,9 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
                 }
             }
             
-            // Dispose of mid-calculation data
+            // Dispose of mid-calculation data (NativeArray views alias NativeList memory, only dispose lists)
             commands.Dispose();
             results.Dispose();
-            commandsArray.Dispose();
-            resultsArray.Dispose();
             points.Dispose();
 #endif
         }
@@ -179,7 +176,12 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
         {
             float3 dir = b - a;
             float dist = math.length(dir);
-            if (Mathf.Approximately(dist, 0f)) return;
+            if (Mathf.Approximately(dist, 0f))
+            {
+                commands.Add(default);
+                results.Add(default);
+                return;
+            }
 
             QueryParameters parameters = new()
             {

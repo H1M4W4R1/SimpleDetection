@@ -298,7 +298,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Abstract
                             Gizmos.color = DetectionSettings.Instance.gizmosColorObjectInsideZoneUndetected; break;
                         case SpotResult.InsideSeen
                             when obj.CanBeDetected(context):
-                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectIndideZoneDetected; break;
+                            Gizmos.color = DetectionSettings.Instance.gizmosColorObjectInsideZoneDetected; break;
                         case SpotResult.InsideSeen:
                             Gizmos.color = DetectionSettings.Instance.gizmosColorObjectInsideZoneGhost; break;
                     }
