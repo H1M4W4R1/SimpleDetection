@@ -192,7 +192,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
 
         [BurstCompile] private float GetFarPlaneHeight()
         {
-            float d = math.length(farPlaneDistance - nearPlaneDistance);
+            float d = farPlaneDistance;
             float horizontalFovRadians = math.radians(horizontalFieldOfView);
 
             // Far plane half-width

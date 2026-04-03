@@ -97,7 +97,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             // Compute arc drawing parameters
             float startAngle = math.radians(-angle * 0.5f);
             float endAngle = math.radians(angle * 0.5f);
-            float radianStep = math.radians(math.abs(endAngle - startAngle) / 8f);
+            float radianStep = math.abs(endAngle - startAngle) / 8f;
 
             // Compute semi-circle (arc) points
             for (float drawAngle = startAngle; drawAngle <= endAngle; drawAngle += radianStep)

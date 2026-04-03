@@ -47,8 +47,11 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             // Ensure that point is in zone
             if (!IsPointInZone(detectionPosition)) return SpotResult.Outside;
 
-            // Compute raycast data
+            // Point at center is always seen
             float2 detectedPosition = detectionPosition.xy;
+            if (math.lengthsq(detectedPosition - position) < math.EPSILON) return SpotResult.InsideSeen;
+
+            // Compute raycast data
             RaycastHit2D hitObj =
                 Physics2D.Raycast(detectedPosition, math.normalize(position - detectedPosition),
                     math.min(math.distance(detectedPosition, position), radius),
@@ -74,7 +77,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
 
 
             // Perform full circle rotation
-            for (float drawAngle = 0f; drawAngle <= math.PI * 2f; drawAngle += math.PI * 2f / RESOLUTION)
+            for (float drawAngle = 0f; drawAngle < math.PI * 2f; drawAngle += math.PI * 2f / RESOLUTION)
             {
                 float2 direction = MathExtensions.Rotate(forward, drawAngle);
                 float3 point = new(position + direction * math.sqrt(radiusSq), 0);

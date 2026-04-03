@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Systems.SimpleCore.Operations;
 using Systems.SimpleDetection.Components.Detectors.Abstract;
 using Systems.SimpleDetection.Data;
@@ -15,24 +14,31 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
     {
         private DetectionState _state;
         private readonly Dictionary<ObjectDetectorBase, DetectionState> _perDetectorState = new();
+        private readonly List<ObjectDetectorBase> _staleKeys = new();
 
 #region BASE Implementation
 
-        protected internal sealed override void OnDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
+        protected internal sealed override void OnDetected(
+            in ObjectDetectionContext context,
+            in OperationResult detectionResult)
         {
             base.OnDetected(context, detectionResult);
             _perDetectorState[context.detector] = DetectionState.Detected;
             TryUpdateState(ResolveAggregateState());
         }
 
-        protected internal sealed override void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
+        protected internal sealed override void OnObjectDetectionFailed(
+            in ObjectDetectionContext context,
+            in OperationResult detectionResult)
         {
             base.OnObjectDetectionFailed(context, detectionResult);
             _perDetectorState[context.detector] = DetectionState.NotDetected;
             TryUpdateState(ResolveAggregateState());
         }
 
-        protected internal sealed override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
+        protected internal sealed override void OnObjectGhostDetected(
+            in ObjectDetectionContext context,
+            in OperationResult detectionResult)
         {
             base.OnObjectGhostDetected(context, detectionResult);
             _perDetectorState[context.detector] = DetectionState.GhostDetected;
@@ -46,12 +52,35 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
         private DetectionState ResolveAggregateState()
         {
             DetectionState best = DetectionState.NotDetected;
+            bool hasStaleEntries = false;
             foreach (KeyValuePair<ObjectDetectorBase, DetectionState> kvp in _perDetectorState)
             {
+                if (!kvp.Key)
+                {
+                    hasStaleEntries = true;
+                    continue;
+                }
+
                 if (kvp.Value == DetectionState.Detected) return DetectionState.Detected;
                 if (kvp.Value == DetectionState.GhostDetected) best = DetectionState.GhostDetected;
             }
+
+            if (hasStaleEntries) CleanupStaleDetectors();
             return best;
+        }
+
+        private void CleanupStaleDetectors()
+        {
+            _staleKeys.Clear();
+            foreach (ObjectDetectorBase key in _perDetectorState.Keys)
+            {
+                if (!key) _staleKeys.Add(key);
+            }
+
+            foreach (ObjectDetectorBase key in _staleKeys)
+            {
+                _perDetectorState.Remove(key);
+            }
         }
 
 #endregion

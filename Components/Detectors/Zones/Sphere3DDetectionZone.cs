@@ -47,6 +47,9 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             // Ensure that point is in zone
             if (!IsPointInZone(detectionPosition)) return SpotResult.Outside;
 
+            // Point at center is always seen
+            if (math.lengthsq(detectionPosition - position) < math.EPSILON) return SpotResult.InsideSeen;
+
             // Compute raycast data
             if (!Physics.Raycast(detectionPosition, math.normalize(position - detectionPosition),
                     out RaycastHit hitObj, math.min(math.distance(detectionPosition, position), radius),
