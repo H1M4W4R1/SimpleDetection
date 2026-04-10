@@ -32,16 +32,28 @@ using UnityEngine;
 
 public class Player : DetectableObjectBase
 {
-    // Optional: Override to provide custom detection behavior
+    // Called every FixedUpdate while detected
     protected internal override void OnDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
     {
         Debug.Log($"Detected by {context.detector.name}");
     }
 
+    // Called every FixedUpdate while not detected
     protected internal override void OnObjectDetectionFailed(in ObjectDetectionContext context, in OperationResult detectionResult)
     {
-        Debug.Log($"Lost detection from {context.detector.name}");
+        Debug.Log($"Not detected by {context.detector.name}");
     }
+}
+```
+
+For detection enter/exit events rather than per-frame callbacks, use `DetectableObjectWithStatesBase`:
+
+```csharp
+public class Player : DetectableObjectWithStatesBase
+{
+    protected override void OnDetectionStartAsDetected() => Debug.Log("Detection started");
+    protected override void OnDetectionEndAsDetected()   => Debug.Log("Detection ended");
+    protected override void OnStayAsDetected()           => Debug.Log("Still detected");
 }
 ```
 
@@ -50,14 +62,23 @@ public class Player : DetectableObjectBase
 ```csharp
 using Systems.SimpleDetection.Components.Detectors.Base;
 
-public sealed class PlayerDetector : Circle2DDetector
+public sealed class EnemyDetector : Circle2DDetector
 {
-    // Inherit from Circle2DDetector for 2D circular detection
     // Configure radius in Inspector
-    
+
     protected override void OnObjectDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
     {
         Debug.Log($"Detected {context.detectableObject.name}");
+    }
+
+    protected override void OnObjectDetectionStart(in ObjectDetectionContext context, in OperationResult detectionResult)
+    {
+        Debug.Log($"{context.detectableObject.name} entered detection zone");
+    }
+
+    protected override void OnObjectDetectionEnd(in ObjectDetectionContext context, in OperationResult detectionResult)
+    {
+        Debug.Log($"{context.detectableObject.name} left detection zone");
     }
 }
 ```
@@ -66,6 +87,7 @@ public sealed class PlayerDetector : Circle2DDetector
    - Add your `DetectableObjectBase` subclass to objects you want to detect (e.g., Player)
    - Add your `ObjectDetectorBase` subclass to detectors (e.g., Enemy, Sensor)
    - Configure detection parameters (radius, angle, etc.) in the Inspector
+   - Set the `Raycast Layer Mask` on the detector to include obstacle layers
 
 ## Detection Zones
 
@@ -78,7 +100,7 @@ public sealed class PlayerDetector : Circle2DDetector
 
 **Frustum2DDetector**
 - Detects objects within a 2D vision cone (bird's eye view)
-- Parameters: `angle` (field of view), `distance` (detection range)
+- Parameters: `angle` (field of view in degrees), `radius` (detection range)
 - Use case: Enemy vision, AI perception with direction awareness
 
 ### 3D Detection Zones
@@ -90,49 +112,60 @@ public sealed class PlayerDetector : Circle2DDetector
 
 **Frustum3DDetector**
 - Detects objects within a 3D perspective frustum (camera-like vision)
-- Parameters: `angle` (vertical FOV), `aspectRatio` (width/height), `nearPlaneDistance`, `farPlaneDistance`
+- Parameters: `angle` (horizontal field of view in degrees), `aspectRatio` (width/height), `nearPlaneDistance`, `farPlaneDistance`
 - Use case: Character vision with realistic viewing frustum, camera-based detection
 
 ## Advanced Usage
 
 ### Ghost Detection
 
-Objects that fail the `CanBeDetected()` check can still be "ghost detected" (visually spotted but not actually detected):
+Ghost detection lets a detector physically spot an object that is not fully detectable (e.g., a stealthed player). To use it:
+
+1. The **detector** must implement `ISupportGhostDetection`. Without this marker interface, objects that fail `CanBeDetected()` are skipped entirely.
+2. The **detectable object** must return `DetectionOperations.IsGhost()` from `CanBeDetected()`.
+
+The simplest way to mark an object as a ghost is the built-in `IsGhost` serialized property on `DetectableObjectBase`. For dynamic control, override `CanBeDetected()`:
 
 ```csharp
-public class StealthPlayer : DetectableObjectBase
+using Systems.SimpleDetection.Components.Detectors.Markers;
+using Systems.SimpleDetection.Components.Detectors.Base;
+
+// Detector must implement ISupportGhostDetection to process ghost objects
+public sealed class AlertDetector : Circle2DDetector, ISupportGhostDetection
 {
-    private bool isStealthed = false;
-
-    protected internal override OperationResult CanBeDetected(ObjectDetectionContext context)
+    protected override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
     {
-        if (isStealthed)
-            return DetectionOperations.IsGhost();  // Visually seen but marked as ghost
-        return DetectionOperations.Permitted();    // Normal detection
-    }
-
-    protected internal override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
-    {
-        // Handle ghost detection (e.g., partial information to detector)
+        Debug.Log($"Ghost spotted: {context.detectableObject.name}");
     }
 }
 ```
 
-### Detector Configuration
+```csharp
+using Systems.SimpleDetection.Components.Objects.Abstract;
+
+public class StealthPlayer : DetectableObjectBase
+{
+    private bool _isStealthed;
+
+    protected internal override OperationResult CanBeDetected(ObjectDetectionContext context)
+    {
+        if (_isStealthed)
+            return DetectionOperations.IsGhost();   // Physically seen but marked as ghost
+        return DetectionOperations.Permitted();      // Normal detection
+    }
+
+    protected internal override void OnObjectGhostDetected(in ObjectDetectionContext context, in OperationResult detectionResult)
+    {
+        // Detector spotted us but we are in ghost state
+    }
+}
+```
+
+### Querying Detected Objects
 
 ```csharp
 public sealed class CustomDetector : Circle2DDetector
 {
-    protected override void OnObjectDetectionStart(in ObjectDetectionContext context, in OperationResult detectionResult)
-    {
-        // Called when an object first enters detection
-    }
-
-    protected override void OnObjectDetectionEnd(in ObjectDetectionContext context, in OperationResult detectionResult)
-    {
-        // Called when an object leaves detection
-    }
-
     // Access detected objects
     public void LogDetectedObjects()
     {
@@ -141,12 +174,24 @@ public sealed class CustomDetector : Circle2DDetector
             Debug.Log($"Currently detecting: {obj.name}");
         }
     }
+
+    // Check if a specific object is currently detected
+    public bool IsSeeingPlayer(DetectableObjectBase player) => IsDetected(player);
+}
+```
+
+On the detectable object side, `DetectedBy` lists all detectors currently seeing it (including ghosts):
+
+```csharp
+public class Player : DetectableObjectBase
+{
+    public bool IsSeenByAnyone => DetectedBy.Count > 0;
 }
 ```
 
 ### Multiple Detection Points
 
-Override `UpdateDetectionPositions()` to support objects with multiple detection points:
+Override `UpdateDetectionPositions()` to support objects with multiple detection points. The detector uses an early-exit: the object is considered detected as soon as any single point is seen.
 
 ```csharp
 public class Vehicle : DetectableObjectBase
@@ -170,20 +215,25 @@ public class Vehicle : DetectableObjectBase
 
 ### Detection Settings
 
-Access global detection settings via `DetectionSettings.Instance`:
+Configure global detection settings via `DetectionSettings.Instance` (auto-created ScriptableObject under `Assets/Resources/DetectionSettings.asset`):
 
-- `drawDetectionPoints`: Enable/disable point rendering
-- `gizmosDrawModeForDetectors`: Control when detection zones display
-- Gizmo colors for different detection states (detected, ghost, obstructed, outside)
-- `detectionPointRadius`: Size of debug spheres
+- `drawDetectionPoints`: Enable/disable per-object detection point spheres
+- `detectionPointRadius`: Size of debug spheres (0.05–1.0 units)
+- `gizmosDrawModeForDetectors`: `Selected` (only selected detectors) or `Always`
+- Gizmo colors for each detection state (all configurable)
 
 ### Gizmo Visualization
 
-The system provides real-time gizmo visualization:
-- **Green**: Objects detected and visible
-- **Yellow**: Objects visible but ghost-detected
-- **Red**: Objects inside zone but line-of-sight blocked
-- **Gray**: Objects outside detection zone
+The system draws real-time gizmos in the Scene view. Default colors:
+
+| Color | Meaning |
+|-------|---------|
+| Blue  | Object is outside the detection zone |
+| Red   | Object is inside the zone and detected (line-of-sight clear, `CanBeDetected` passes) |
+| Green | Object is inside the zone but line-of-sight is blocked |
+| Yellow | Object is inside the zone, line-of-sight is clear, but `CanBeDetected` fails (ghost) |
+
+All colors are customizable in `DetectionSettings`.
 
 ## Performance Considerations
 
@@ -191,7 +241,7 @@ The system provides real-time gizmo visualization:
 - Uses Unity Burst compilation for high-performance zone calculations
 - `UnsafeList<float3>` for efficient detection point storage
 - Only raycasts for points inside the detection zone
-- Early-exit optimization when first point is detected
+- Early-exit optimization when first detection point is confirmed visible
 
 ## License
 
