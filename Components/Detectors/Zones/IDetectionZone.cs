@@ -1,4 +1,5 @@
-﻿using Systems.SimpleDetection.Data.Enums;
+﻿using JetBrains.Annotations;
+using Systems.SimpleDetection.Data.Enums;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
         /// </summary>
         /// <param name="detectionPosition">Position to check</param>
         /// <returns>True if point is inside detection zone</returns>
-        public bool IsPointInZone(in float3 detectionPosition);
+        [UsedImplicitly] public bool IsPointInZone(in float3 detectionPosition);
 
         /// <summary>
         ///     Check if point is seen, performs raycast to check if point is visible

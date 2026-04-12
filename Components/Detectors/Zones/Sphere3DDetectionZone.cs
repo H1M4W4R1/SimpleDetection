@@ -195,7 +195,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
             };
 
             // Create raycast command
-            RaycastCommand command = new RaycastCommand(a, math.normalize(dir), parameters, dist);
+            RaycastCommand command = new(a, math.normalize(dir), parameters, dist);
             commands.Add(command);
             results.Add(default);
         }

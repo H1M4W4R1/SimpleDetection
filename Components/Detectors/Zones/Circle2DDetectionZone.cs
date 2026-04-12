@@ -73,7 +73,7 @@ namespace Systems.SimpleDetection.Components.Detectors.Zones
 
             UnsafeList<float3> targetPoints = new(RESOLUTION, Allocator.Temp);
             float3 gizmosStartPoint = new(position, 0);
-            float2 forward = new float2(0, 1);
+            float2 forward = new(0, 1);
 
 
             // Perform full circle rotation
