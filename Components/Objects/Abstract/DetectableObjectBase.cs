@@ -163,7 +163,7 @@ namespace Systems.SimpleDetection.Components.Objects.Abstract
 
             // Don't know why array has IReadOnlyList implemented, but it works
             // so who tf cares?
-            return FindObjectsByType<DetectableObjectBase>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            return FindObjectsByType<DetectableObjectBase>(FindObjectsInactive.Exclude);
 #endif
         }
     }
